@@ -7,7 +7,7 @@ const CategoryFilter = ({ category, onChange }) => {
 			value={category}
 			onChange={e => {
 				const value = e.target.value;
-				onChange(value === 'all' ? undfefined : value);
+				onChange(value === 'all' ? undefined : value);
 			}}>
 			<option value={'all'}>전체</option>
 			{categories.map(category => (
