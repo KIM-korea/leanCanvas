@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FaPlus } from 'react-icons/fa';
 import Note from './Note';
 import { v4 as uuidv4 } from 'uuid';

@@ -2,19 +2,16 @@ import React from 'react';
 import CanvasItem from './CanvasItem';
 
 const CanvasList = ({ filteredItems, isGridView, onDeleteItem, searchText }) => {
-  if (filteredItems.length === 0)
+  if (filteredItems.length === 0) {
+    const emptyMessage = searchText
+      ? '검색 결과가 없습니다'
+      : '목록이 없습니다';
     return (
       <div className="text-center py-10">
-        <p className="text-xl text-gray-600">목록이 없습니다</p>
+        <p className="text-xl text-gray-600">{emptyMessage}</p>
       </div>
     );
-
-  if (filteredItems.length === 0)
-    return (
-      <div className="text-center py-10">
-        <p className="text-xl text-gray-600">검색 결과가 없습니다</p>
-      </div>
-    );
+  }
 
   return (
     <div

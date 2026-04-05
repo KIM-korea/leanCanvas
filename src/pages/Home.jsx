@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import SearchBar from '../components/SearchBar';
 import CanvasList from '../components/CanvasList';
@@ -6,7 +6,7 @@ import ViewToggle from '../components/ViewToggle';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
 import Button from '../components/Button';
-import CategoryFilter from '../components/categoryFilter';
+import CategoryFilter from '../components/CategoryFilter';
 
 import { getCanvases, createCanvas, deleteCanvas } from '../api/canvas';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -38,23 +38,21 @@ function Home() {
   })
 
   //등록
-  const { mutate: createNewCanvas, isLoading: isLoadingCreate } = useMutation({
+  const { mutate: createNewCanvas, isPending: isLoadingCreate } = useMutation({
     mutationFn: createCanvas,
-    onSuccess: () => queryClient.invalidateQueries(['canvases']),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['canvases'] }),
     onError: (error) => alert(error.message),
   })
 
 
   //삭제
-  const { mutate: deleteCanvasMutation, isLoading: isLoadingDelete } = useMutation({
+  const { mutate: deleteCanvasMutation } = useMutation({
     mutationFn: deleteCanvas,
-    onSuccess: () => queryClient.invalidateQueries(['canvases']),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['canvases'] }),
     onError: (error) => alert(error.message),
   })
-
-  const handleSearchItem = e => {
-    setSearchItem(e.target.value);
-  };
 
   const handleDeleteItem = async (id) => {
     if (confirm('삭제 하시겠습니까?') === false) {

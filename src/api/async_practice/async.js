@@ -11,7 +11,7 @@ function getUser(userId) {
   })
 }
 
-function runPromise() {
+function _runPromise() {
   getUser(1).then(user => {
     if (user) {
       console.log(user)

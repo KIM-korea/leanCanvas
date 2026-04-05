@@ -25,7 +25,7 @@ const Note = ({ id, onRemoveNote, content, color: initialColor, onUpdateNote }) 
     return colorOptions[randomIndex];
   });
 
-  const handleContentChange = (e) => {
+  const handleContentChange = () => {
     onUpdateNote(id, localContent, color);
   }
 
