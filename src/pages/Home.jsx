@@ -6,22 +6,51 @@ import ViewToggle from '../components/ViewToggle';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
 import Button from '../components/Button';
+import CategoryFilter from '../components/categoryFilter';
 
 import { getCanvases, createCanvas, deleteCanvas } from '../api/canvas';
-import useApiRequest from '../hooks/useApiRequest';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 function Home() {
   // const [Item, setItem] = useState([]);
-  const [searchItem, setSearchItem] = useState();//초기값으로 undefined로 선언 해야 함
+  
+  const [filter,setFilter] = useState({
+    searchItem: null,
+    category: null,
+  });
+
+  const handleFilter=(key,value)=>{
+    setFilter(
+      {...filter,
+        [key]: value,
+      })
+  }
+
   const [isGridView, setIsGridView] = useState(true);
 
-  const { isLoading, error, execute: fetchData, Item } = useApiRequest(getCanvases, { initialData: [] });
-  const { isLoading: isLoadingCreate, exectue: createNewCanvas } = useApiRequest(createCanvas);
+  const queryClient = useQueryClient();
+  //데이터 조회
+  const { data: Item, isLoading, error, refetch } = useQuery({
+    queryKey: ['canvases', filter.searchItem, filter.category],
+    queryFn: () => getCanvases({ title_like: filter.searchItem, category: filter.category }),
+    initialData: [],
+  })
 
-  useEffect(() => {
-    fetchData({ title_like: searchItem },
-    );
-  }, [searchItem, fetchData])//검색창을 입력할 때 마다 fetch수행
+  //등록
+  const { mutate: createNewCanvas, isLoading: isLoadingCreate } = useMutation({
+    mutationFn: createCanvas,
+    onSuccess: () => queryClient.invalidateQueries(['canvases']),
+    onError: (error) => alert(error.message),
+  })
+
+
+  //삭제
+  const { mutate: deleteCanvasMutation, isLoading: isLoadingDelete } = useMutation({
+    mutationFn: deleteCanvas,
+    onSuccess: () => queryClient.invalidateQueries(['canvases']),
+    onError: (error) => alert(error.message),
+  })
 
   const handleSearchItem = e => {
     setSearchItem(e.target.value);
@@ -31,52 +60,34 @@ function Home() {
     if (confirm('삭제 하시겠습니까?') === false) {
       return;
     }
-    try {
-      await deleteCanvas(id);
-      fetchData({ title_like: searchItem });
-    } catch (error) {
-      alert(error.message);
-    }
+    deleteCanvasMutation(id);
   }
 
   const handleCreateCanvas = async () => {
-    createNewCanvas(null, {
-      onSuccess: () => {
-        fetchData({ title_like: searchItem },
-        );
-      },
-      onError: (error) => alert(error.message)
-    })
-    // try {
-    //   setIsLoadingCreate(true);
-    //   await new Promise(resolver => setTimeout(() => resolver(true), 1000));
-    //   await createCanvas();//createCanvas는 Promise객체를 반환한다. 여기에 await을 거는 순간 resolve안의 매개변수 값을 불러온다.
-    //   fetchData({ title_like: searchItem });
-    // } catch (error) {
-    //   alert(error.message);
-    // } finally {
-    //   setIsLoadingCreate(false);
-    // }
-
+    createNewCanvas();
   }
 
   return (
     <>
       <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
-        <SearchBar
-          searchItem={searchItem}
-          handleSearchItem={handleSearchItem}
-        />
+        <div className="flex gap-2 flex-col w-full sm:flex-row mb-4 sm:mb-0">
+          <SearchBar
+            searchItem={filter.searchItem}
+            handleSearchItem={(val)=>handleFilter('searchItem',val)}
+          />
+          <CategoryFilter category={filter.category} onChange={(val)=>handleFilter('category',val)}/>
+        </div>
         <ViewToggle isGridView={isGridView} setIsGridView={setIsGridView} />
       </div>
       <div className="flex justify-end mb-6">
         <Button onClick={handleCreateCanvas} loading={isLoadingCreate}>등록하기</Button>
       </div>
       {isLoading && <Loading />}
-      {error && <Error message={error.message} onRetry={() => fetchData({ title_like: searchItem })} />}
+      {error && <Error message={error.message} onRetry={refetch} />}
       {(!isLoading && !error) && (<CanvasList
         filteredItems={Item || []}
         isGridView={isGridView}
+        searchText={filter.searchItem}
         onDeleteItem={handleDeleteItem}
       />)}
 

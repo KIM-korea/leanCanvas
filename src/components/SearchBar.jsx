@@ -1,13 +1,21 @@
 import React from 'react';
 import { FaSearch } from 'react-icons/fa';
+import { useState } from 'react';
+
 const SearchBar = ({ searchItem = '', handleSearchItem }) => {
+  const [localSearchItem, setLocalSearchItem] = useState(searchItem);
   return (
     <div className="relative w-full sm:w-64 mb-4 sm:mb-0">
       <input
         type="text"
         placeholder="검색"
-        value={searchItem}
-        onChange={handleSearchItem}
+        value={localSearchItem}
+        onChange={e=>setLocalSearchItem(e.target.value)}
+        onKeyDown={e=>{
+          if(e.key==='Enter'){
+            handleSearchItem(localSearchItem);
+          }
+        }}
         className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label="검색"
       />

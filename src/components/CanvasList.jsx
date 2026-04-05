@@ -1,7 +1,7 @@
 import React from 'react';
 import CanvasItem from './CanvasItem';
 
-const CanvasList = ({ filteredItems, isGridView, onDeleteItem }) => {
+const CanvasList = ({ filteredItems, isGridView, onDeleteItem, searchText }) => {
   if (filteredItems.length === 0)
     return (
       <div className="text-center py-10">
